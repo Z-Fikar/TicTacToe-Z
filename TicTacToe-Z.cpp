@@ -3,6 +3,7 @@
 
 int papan[9];
 int count;
+int urutKom;
 
 void menu();
 void init();
@@ -10,6 +11,7 @@ void jalan(int simbol, int jenis);
 void pemain(int simbol);
 void komp(int simbol);
 void komJalan(int simbol);
+void komPertama(int simbol);
 void komTaktik(int simbol, int taktik = 1);
 void tampil();
 bool cekMenang();
@@ -32,13 +34,15 @@ void komp(int simbol){
 	count++;
 }
 
-void komJalan(int simbol){
+void komPertama(int simbol){
 	bool sudah = false;
 	bool ulang = true;
 	bool kosong = false;
 	int a = rand() % 5;
-	while (ulang && !kosong){
+	if (a == 2) a++;
+	while (ulang){
 		for (int i=0; i<9; i+=2){
+			if (i == 4) i+=2;
 			if(papan[i] == 0){
 				kosong = true;
 				break;
@@ -48,6 +52,70 @@ void komJalan(int simbol){
 			papan[2*a] = simbol; 
 			ulang = false; 
 			sudah = true;
+		}
+		else{
+			ulang = false;
+		}
+	}
+	if (!sudah || !kosong){
+		komJalan(simbol);
+	}
+}
+
+void komKedua(int simbol){
+	bool sudah = false;
+	bool ulang = true;
+	bool kosong = false;
+	int a = rand() % 4;
+	if (papan[4] == 0){
+		papan[4] = simbol;
+		sudah = true;
+		kosong = true;
+	}
+	while (ulang && !sudah){
+		for (int i=1; i<8; i+=2){
+			if(papan[i] == 0){
+				kosong = true;
+				break;
+			}
+		}
+		if (kosong && (papan[2*a+1] == 0)){
+			papan[2*a+1] = simbol; 
+			ulang = false; 
+			sudah = true;
+		}
+		else{
+			ulang = false;
+		}
+	}
+	if (!sudah || !kosong){
+		komJalan(simbol);
+	}	
+}
+
+
+void komJalan(int simbol){
+	bool sudah = false;
+	bool ulang = true;
+	bool kosong = false;
+	int a;
+	while (ulang){
+		for (int i=0; i<9; i+=2){
+			if(papan[i] == 0){
+				kosong = true;
+				break;
+			}
+		}
+		a = rand() % 5;
+		if (kosong){
+			if (papan[2*a] == 0){
+				papan[2*a] = simbol; 
+				ulang = false; 
+				sudah = true;
+			}
+		}
+		else{
+			ulang = false;
 		}
 	}
 	if (!sudah || !kosong){
@@ -132,7 +200,9 @@ void komTaktik(int simbol, int taktik){
 	}
 	else{
 		if (taktik == -1){
-			komJalan(simbol);
+			if ((urutKom == 1)&& (count < 6)) komPertama(simbol);
+			else if ((urutKom == 2)&&(count <6)) komKedua(simbol);
+			else komJalan(simbol);
 		}
 		else{
 			komTaktik(simbol, -taktik);
@@ -151,16 +221,18 @@ void init(){
 void mulai(int perintah){
 	int simbol = -1;
 	int jenis; //1 player, -1 komputer
-	if (perintah <= 2) jenis = 1;
-	else if (perintah >= 3) jenis = -1;
+	if ((perintah == 1) || (perintah == 3)) jenis = 1;
+	else if ((perintah == 2) ||(perintah == 4)) jenis = -1;
 	while ((count<9) && (!cekMenang())){
 		tampil();
 		simbol = -simbol;
 		switch (perintah){
 			case 1: jalan(simbol, jenis); break;
-			case 2: jenis = -jenis; jalan(simbol, jenis); break;
-			case 3: jenis = -jenis; jalan(simbol, jenis); break;
-			case 4: jalan(simbol, jenis); break;
+			case 2: jenis = -jenis; urutKom = 2; jalan(simbol, jenis); break;
+			case 3: jenis = -jenis; urutKom = 1; jalan(simbol, jenis); break;
+			case 4:
+				if (urutKom == 2) urutKom = 1; else urutKom = 2;
+				jalan(simbol, jenis); break;
 		}
 	}
 	tampil();
