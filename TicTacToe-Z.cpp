@@ -5,33 +5,93 @@ int papan[9];
 int count;
 int urutKom;
 
-void menu();
-void init();
-void jalan(int simbol, int jenis);
-void pemain(int simbol);
-void komp(int simbol);
-void komJalan(int simbol);
-void komPertama(int simbol);
-void komTaktik(int simbol, int taktik = 1);
-void tampil();
-bool cekMenang();
-char ikec(int angka);
-
-
-void jalan(int simbol, int jenis = 1){
-	if (jenis == 1){
-		pemain(simbol);
+char ikec(int angka){
+	if ((angka == -1) || (angka == -3)){
+		return 'X';
+	}
+	else if((angka == 1)||(angka == 3)){
+		return 'O';
 	}
 	else{
-		komp(simbol);
+		return '_';
 	}
 }
 
-void komp(int simbol){
+void tampil(){
+	system("cls");
+	cout<<"\n\t  \t1\t \t2\t \t3\t \n";
+	cout<<"\t +--------------+---------------+---------------+\n";
+	for(int i = 0 ; i < 3 ; i++){
+		cout<<"\t |\t \t|\t \t|\t \t|\n\t |\t \t|\t \t|\t \t|\n";
+		cout<<"\t"<<i+1<<"|";
+		for(int j = 0 ; j < 3 ; j++){
+			cout<<"\t"<<ikec(papan[i*3+j])<<"\t|";
+		}
+		cout<<"\n\t |\t \t|\t \t|\t \t|\n\t |\t \t|\t \t|\t \t|\n";
+		cout<<"\t +--------------+---------------+---------------+\n";
+	}
+}
+
+void init(){
+	count = 0;
+	for(int i = 0 ; i < 9 ; i++){
+		papan[i] = 0;
+	}
+	tampil();
+}
+
+void pemain(int simbol){
+	int baris, kolom;
 	cout<<"Giliran "<<ikec(simbol)<<"\n";
-	_sleep(1000);
-	komTaktik(simbol);
-	count++;
+	cout << "Baris ke: ";
+	cin >> baris;
+	cout << "Kolom ke: ";
+	cin >> kolom;
+	if ((papan[3*baris+kolom-4] == 0) && (baris<=3) && (kolom<=3) && (baris>0) && (kolom>0)){
+		papan[3*baris+kolom-4] = simbol;
+		count = count + 1;
+		cout<<" "<<count<<endl;
+	}
+	else{
+		cout<<"Tempat tidak tersedia. Masukkan posisi yang lain\n";
+		system("pause");
+		tampil();
+		pemain(simbol);
+	}
+}
+
+void komJalan(int simbol){
+	bool sudah = false;
+	bool ulang = true;
+	bool kosong = false;
+	int a;
+	while (ulang){
+		for (int i=0; i<9; i+=2){
+			if(papan[i] == 0){
+				kosong = true;
+				break;
+			}
+		}
+		a = rand() % 5;
+		if (kosong){
+			if (papan[2*a] == 0){
+				papan[2*a] = simbol; 
+				ulang = false; 
+				sudah = true;
+			}
+		}
+		else{
+			ulang = false;
+		}
+	}
+	if (!sudah || !kosong){
+		for (int i = 1; i<8; i+=2){
+			if (papan[i] == 0){
+				papan[i] = simbol;
+				break;
+			}
+		}
+	}
 }
 
 void komPertama(int simbol){
@@ -93,42 +153,7 @@ void komKedua(int simbol){
 	}	
 }
 
-
-void komJalan(int simbol){
-	bool sudah = false;
-	bool ulang = true;
-	bool kosong = false;
-	int a;
-	while (ulang){
-		for (int i=0; i<9; i+=2){
-			if(papan[i] == 0){
-				kosong = true;
-				break;
-			}
-		}
-		a = rand() % 5;
-		if (kosong){
-			if (papan[2*a] == 0){
-				papan[2*a] = simbol; 
-				ulang = false; 
-				sudah = true;
-			}
-		}
-		else{
-			ulang = false;
-		}
-	}
-	if (!sudah || !kosong){
-		for (int i = 1; i<8; i+=2){
-			if (papan[i] == 0){
-				papan[i] = simbol;
-				break;
-			}
-		}
-	}
-}
-
-void komTaktik(int simbol, int taktik){
+void komTaktik(int simbol, int taktik = 1){
 	int baris[3], kolom[3], diag[2], i;
 	
 	baris[1] = papan[0] + papan[1] + papan[2];
@@ -210,58 +235,21 @@ void komTaktik(int simbol, int taktik){
 	}
 }
 
-void init(){
-	count = 0;
-	for(int i = 0 ; i < 9 ; i++){
-		papan[i] = 0;
-	}
-	tampil();
+void komp(int simbol){
+	cout<<"Giliran "<<ikec(simbol)<<"\n";
+	_sleep(1000);
+	komTaktik(simbol);
+	count++;
 }
 
-void mulai(int perintah){
-	int simbol = -1;
-	int jenis; //1 player, -1 komputer
-	if ((perintah == 1) || (perintah == 3)) jenis = 1;
-	else if ((perintah == 2) ||(perintah == 4)) jenis = -1;
-	while ((count<9) && (!cekMenang())){
-		tampil();
-		simbol = -simbol;
-		switch (perintah){
-			case 1: jalan(simbol, jenis); break;
-			case 2: jenis = -jenis; urutKom = 2; jalan(simbol, jenis); break;
-			case 3: jenis = -jenis; urutKom = 1; jalan(simbol, jenis); break;
-			case 4:
-				if (urutKom == 2) urutKom = 1; else urutKom = 2;
-				jalan(simbol, jenis); break;
-		}
+void jalan(int simbol, int jenis = 1){
+	if (jenis == 1){
+		pemain(simbol);
 	}
-	tampil();
-	if (cekMenang()){
-		cout<<endl<<ikec(simbol)<<" Menang!";
-	}
-	else if (count == 9){
-		cout<<endl<<"XO Seri OX";
-	}
-	cout<<endl;
-	system("pause");
-	menu();
-}
-
-void tampil(){
-	system("cls");
-	cout<<"\n\t  \t1\t \t2\t \t3\t \n";
-	cout<<"\t +--------------+---------------+---------------+\n";
-	for(int i = 0 ; i < 3 ; i++){
-		cout<<"\t |\t \t|\t \t|\t \t|\n\t |\t \t|\t \t|\t \t|\n";
-		cout<<"\t"<<i+1<<"|";
-		for(int j = 0 ; j < 3 ; j++){
-			cout<<"\t"<<ikec(papan[i*3+j])<<"\t|";
-		}
-		cout<<"\n\t |\t \t|\t \t|\t \t|\n\t |\t \t|\t \t|\t \t|\n";
-		cout<<"\t +--------------+---------------+---------------+\n";
+	else{
+		komp(simbol);
 	}
 }
-
 
 bool cekMenang(){
 	int baris1, baris2, baris3;
@@ -292,25 +280,7 @@ bool cekMenang(){
 	}
 }
 
-void pemain(int simbol){
-	int baris, kolom;
-	cout<<"Giliran "<<ikec(simbol)<<"\n";
-	cout << "Baris ke: ";
-	cin >> baris;
-	cout << "Kolom ke: ";
-	cin >> kolom;
-	if ((papan[3*baris+kolom-4] == 0) && (baris<=3) && (kolom<=3) && (baris>0) && (kolom>0)){
-		papan[3*baris+kolom-4] = simbol;
-		count = count + 1;
-		cout<<" "<<count<<endl;
-	}
-	else{
-		cout<<"Tempat tidak tersedia. Masukkan posisi yang lain\n";
-		system("pause");
-		tampil();
-		pemain(simbol);
-	}
-}
+void mulai(int perintah);
 
 void menu(){
 	int perintah=1;
@@ -331,26 +301,37 @@ void menu(){
 			init();
 			mulai(perintah);
 		}
-		//switch (perintah){
-		//	case 1: pvp();
-		//	case 2: pvc();
-		//	case 3: cvp();
-		//	case 4: cvc();
-		//}
 	}
 	exit(0);
 }
 
-char ikec(int angka){
-	if ((angka == -1) || (angka == -3)){
-		return 'X';
+void mulai(int perintah){
+	int simbol = -1;
+	int jenis;
+	if ((perintah == 1) || (perintah == 3)) jenis = 1;
+	else if ((perintah == 2) ||(perintah == 4)) jenis = -1;
+	while ((count<9) && (!cekMenang())){
+		tampil();
+		simbol = -simbol;
+		switch (perintah){
+			case 1: jalan(simbol, jenis); break;
+			case 2: jenis = -jenis; urutKom = 2; jalan(simbol, jenis); break;
+			case 3: jenis = -jenis; urutKom = 1; jalan(simbol, jenis); break;
+			case 4:
+				if (urutKom == 2) urutKom = 1; else urutKom = 2;
+				jalan(simbol, jenis); break;
+		}
 	}
-	else if((angka == 1)||(angka == 3)){
-		return 'O';
+	tampil();
+	if (cekMenang()){
+		cout<<endl<<ikec(simbol)<<" Menang!";
 	}
-	else{
-		return '_';
+	else if (count == 9){
+		cout<<endl<<"XO Seri OX";
 	}
+	cout<<endl;
+	system("pause");
+	menu();
 }
 
 int main(){
